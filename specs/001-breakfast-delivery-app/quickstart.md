@@ -42,7 +42,7 @@ git --version   # 應顯示 git version 2.x.x 或更高
 
 ```bash
 git clone <repository-url>
-cd videcoding-smaple-nextjs
+cd videcoding-sample-nextjs
 ```
 
 ### 2. 切換到功能分支
