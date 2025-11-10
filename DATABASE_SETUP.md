@@ -26,7 +26,39 @@
 
 ## 🚀 快速開始
 
-### 1. 設定環境變數
+### 方式 A: 使用 Docker (推薦) 🐳
+
+使用 Docker 可以快速啟動本地開發資料庫，無需手動安裝 PostgreSQL 或 SQL Server。
+
+1. **安裝 Docker Desktop**
+   - 下載並安裝 [Docker Desktop](https://www.docker.com/products/docker-desktop)
+   - 確保 Docker 正在運行
+
+2. **設定環境變數**
+   ```bash
+   cp .env.example .env.local
+   ```
+
+3. **一鍵啟動資料庫**
+   ```bash
+   npm run db:setup
+   ```
+   這會自動:
+   - 啟動 PostgreSQL 和 SQL Server Docker 容器
+   - 測試資料庫連線
+   - 生成 Prisma Client
+   - 推送資料模型到資料庫
+
+4. **開始開發**
+   ```bash
+   npm run dev
+   ```
+
+詳細的 Docker 使用說明請參考 [DOCKER.md](./DOCKER.md)
+
+### 方式 B: 使用雲端資料庫
+
+#### 1. 設定環境變數
 
 複製 `.env.example` 到 `.env.local`:
 
@@ -34,7 +66,7 @@
 cp .env.example .env.local
 ```
 
-### 2. 選擇資料庫並設定連線
+#### 2. 選擇資料庫並設定連線
 
 #### 選項 A: PostgreSQL (Vercel) - 推薦
 
@@ -169,6 +201,8 @@ const userOrders = await prisma.order.findMany({
 
 ## 🛠 可用指令
 
+### Prisma 指令
+
 | 指令 | 說明 |
 |------|------|
 | `npm run prisma:generate` | 重新生成 Prisma Client |
@@ -178,9 +212,55 @@ const userOrders = await prisma.order.findMany({
 | `npm run prisma:migrate:deploy` | 部署 migration 到正式環境 |
 | `npm run prisma:format` | 格式化 schema.prisma |
 
+### Docker 資料庫管理指令
+
+| 指令 | 說明 |
+|------|------|
+| `npm run db:start` | 啟動資料庫容器 (PostgreSQL + SQL Server) |
+| `npm run db:stop` | 停止所有資料庫容器 |
+| `npm run db:restart` | 重啟所有資料庫容器 |
+| `npm run db:logs` | 查看所有容器日誌 |
+| `npm run db:logs:postgres` | 查看 PostgreSQL 日誌 |
+| `npm run db:logs:sqlserver` | 查看 SQL Server 日誌 |
+| `npm run db:clean` | 停止並刪除所有容器和資料卷 (⚠️ 會清除所有資料) |
+| `npm run db:ps` | 查看容器狀態 |
+| `npm run db:setup` | 一鍵設定：啟動、測試、生成 Client、推送 schema |
+
+### 資料庫測試與切換指令
+
+| 指令 | 說明 |
+|------|------|
+| `npm run db:test` | 測試當前 DATABASE_URL 連線 |
+| `npm run db:test:postgres` | 測試 PostgreSQL 連線 |
+| `npm run db:test:sqlserver` | 測試 SQL Server 連線 |
+| `npm run db:test:all` | 測試所有資料庫連線 |
+| `npm run db:switch` | 互動式切換資料庫 provider |
+| `npm run db:switch:postgres` | 快速切換到 PostgreSQL |
+| `npm run db:switch:sqlserver` | 快速切換到 SQL Server |
+
 ## 🔄 切換資料庫
 
-專案支援彈性切換 PostgreSQL 和 SQL Server:
+專案支援彈性切換 PostgreSQL 和 SQL Server，提供兩種方式:
+
+### 方式 A: 使用自動化工具 (推薦)
+
+```bash
+# 互動式選擇
+npm run db:switch
+
+# 快速切換到 PostgreSQL
+npm run db:switch:postgres
+
+# 快速切換到 SQL Server
+npm run db:switch:sqlserver
+```
+
+工具會自動:
+1. 更新 `.env.local` 的 `DATABASE_URL`
+2. 更新 `prisma/schema.prisma` 的 `provider`
+3. 重新生成 Prisma Client
+
+### 方式 B: 手動切換
 
 1. 更新 `prisma/schema.prisma` 的 `provider`
 2. 更新 `.env.local` 的 `DATABASE_URL`

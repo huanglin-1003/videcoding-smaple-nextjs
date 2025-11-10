@@ -1,12 +1,19 @@
 // Prisma Schema for Taiwanese Breakfast Delivery App
 // Based on: specs/001-breakfast-delivery-app/data-model.md
+//
+// Multi-Database Support:
+// This schema supports both PostgreSQL and SQL Server
+// - To switch databases, use: npm run db:switch
+// - Or manually change the provider below and run: npm run prisma:generate
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql" // Change to "sqlserver" for SQL Server
+  // Supported: "postgresql" | "sqlserver"
+  // Change this value to switch database providers
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

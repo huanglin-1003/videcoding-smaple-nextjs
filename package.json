@@ -12,7 +12,23 @@
     "prisma:push": "prisma db push",
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
-    "prisma:format": "prisma format"
+    "prisma:format": "prisma format",
+    "db:start": "docker-compose up -d",
+    "db:stop": "docker-compose down",
+    "db:restart": "docker-compose restart",
+    "db:logs": "docker-compose logs -f",
+    "db:logs:postgres": "docker-compose logs -f postgres",
+    "db:logs:sqlserver": "docker-compose logs -f sqlserver",
+    "db:clean": "docker-compose down -v",
+    "db:ps": "docker-compose ps",
+    "db:test": "tsx scripts/db/test-connection.ts",
+    "db:test:postgres": "tsx scripts/db/test-connection.ts postgres",
+    "db:test:sqlserver": "tsx scripts/db/test-connection.ts sqlserver",
+    "db:test:all": "tsx scripts/db/test-connection.ts all",
+    "db:switch": "tsx scripts/db/switch-database.ts",
+    "db:switch:postgres": "tsx scripts/db/switch-database.ts postgres",
+    "db:switch:sqlserver": "tsx scripts/db/switch-database.ts sqlserver",
+    "db:setup": "npm run db:start && npm run db:test && npm run prisma:generate && npm run prisma:push"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
@@ -37,6 +53,7 @@
     "eslint-config-next": "16.0.1",
     "prisma": "^6.19.0",
     "tailwindcss": "^4",
+    "tsx": "^4.20.6",
     "typescript": "^5"
   }
 }
