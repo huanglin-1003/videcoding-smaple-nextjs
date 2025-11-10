@@ -1,0 +1,158 @@
+// Prisma Schema for Taiwanese Breakfast Delivery App
+// Based on: specs/001-breakfast-delivery-app/data-model.md
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // Change to "sqlserver" for SQL Server
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// Enums
+// ============================================
+
+enum ProductCategory {
+  DRINK
+  MAIN
+  SIDE
+}
+
+enum OrderStatus {
+  PENDING    // 待付款
+  CONFIRMED  // 已確認
+  PREPARING  // 準備中
+  READY      // 已完成
+  DELIVERED  // 已送達
+  CANCELLED  // 已取消
+}
+
+enum PaymentMethodType {
+  CREDIT_CARD
+  MASTERCARD
+  VISA
+  APPLE_PAY
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
+// ============================================
+// Models
+// ============================================
+
+// User Model (for order history and authentication)
+model User {
+  id             String          @id @default(cuid())
+  email          String          @unique
+  name           String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  // Relations
+  orders         Order[]
+  paymentMethods PaymentMethod[]
+
+  @@map("users")
+}
+
+// Product Model - 商品
+model Product {
+  id          String          @id @default(cuid())
+  name        String          // English name
+  nameZh      String?         // Chinese name (中文名稱)
+  description String
+  price       Decimal         @db.Decimal(10, 2) // USD, 2 decimal places
+  image       String          // URL or path
+  category    ProductCategory
+  isAvailable Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  // Relations
+  orderItems  OrderItem[]
+
+  @@map("products")
+}
+
+// Order Model - 訂單
+model Order {
+  id             String            @id @default(cuid())
+  orderNumber    String            @unique // Format: #123456
+  subtotal       Decimal           @db.Decimal(10, 2)
+  total          Decimal           @db.Decimal(10, 2)
+  status         OrderStatus       @default(PENDING)
+  paymentMethod  PaymentMethodType
+  estimatedTime  Int?              @default(15) // Minutes (15-20)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  // Relations
+  userId         String?
+  user           User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items          OrderItem[]
+
+  @@map("orders")
+  @@index([userId])
+  @@index([orderNumber])
+}
+
+// OrderItem Model - 訂單項目
+model OrderItem {
+  id          String   @id @default(cuid())
+  productName String   // Snapshot of product name at order time
+  quantity    Int
+  price       Decimal  @db.Decimal(10, 2) // Price snapshot at order time
+  subtotal    Decimal  @db.Decimal(10, 2) // quantity × price
+  createdAt   DateTime @default(now())
+
+  // Relations
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@map("order_items")
+  @@index([orderId])
+  @@index([productId])
+}
+
+// PaymentMethod Model - 付款方式
+model PaymentMethod {
+  id        String            @id @default(cuid())
+  type      PaymentMethodType
+  last4     String?           @db.Char(4) // Last 4 digits of card
+  brand     String?           // Visa, Mastercard, etc.
+  isDefault Boolean           @default(false)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  // Relations
+  userId    String?
+  user      User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("payment_methods")
+  @@index([userId])
+}
+
+// PaymentIntent Model - 付款意圖 (for tracking payment processing)
+model PaymentIntent {
+  id            String        @id @default(cuid())
+  orderId       String        @unique
+  amount        Decimal       @db.Decimal(10, 2)
+  currency      String        @default("USD") @db.VarChar(3)
+  paymentMethod PaymentMethodType
+  status        PaymentStatus @default(PENDING)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@map("payment_intents")
+  @@index([orderId])
+}
