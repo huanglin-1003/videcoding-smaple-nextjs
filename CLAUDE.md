@@ -123,7 +123,7 @@ Components must be manually created in `components/ui/`:
 
 ### Type Safety
 - TypeScript strict mode is enabled
-- Target: ES2017
+- Target: ES2020 (required for Prisma Client private identifiers)
 - Module resolution: bundler (Next.js specific)
 - JSX pragma: react-jsx (automatic runtime)
 - All `.ts` and `.tsx` files are included except node_modules
